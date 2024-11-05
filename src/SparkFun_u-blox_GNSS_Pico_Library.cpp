@@ -40,7 +40,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "SparkFun_u-blox_GNSS_Pico_Library.h"
+#include "SparkFun_u-blox_GNSS_Pico_Library.hpp"
 
 SFE_UBLOX_GNSS::SFE_UBLOX_GNSS(void)
 {
@@ -637,7 +637,7 @@ size_t SFE_UBLOX_GNSS::getPacketCfgSpaceRemaining()
 bool SFE_UBLOX_GNSS::begin(TwoWire &wirePort, uint8_t deviceAddress, uint16_t maxWait, bool assumeSuccess)
 {
   commType = COMM_TYPE_I2C;
-  _i2cPort = &wirePort; // Grab which port the user wants us to use
+  //_i2cPort = &wirePort; // Grab which port the user wants us to use
   _signsOfLife = false; // Clear the _signsOfLife flag. It will be set true if valid traffic is seen.
 
   // We expect caller to begin their I2C port, with the speed of their choice external to the library
@@ -696,6 +696,7 @@ bool SFE_UBLOX_GNSS::begin(TwoWire &wirePort, uint8_t deviceAddress, uint16_t ma
   return (connected);
 }
 
+#if 0
 // Initialize the Serial port
 bool SFE_UBLOX_GNSS::begin(Stream &serialPort, uint16_t maxWait, bool assumeSuccess)
 {
@@ -853,6 +854,7 @@ bool SFE_UBLOX_GNSS::begin(SPIClass &spiPort, uint8_t csPin, uint32_t spiSpeed, 
 
   return (connected);
 }
+#endif
 
 // Allow the user to change I2C polling wait (the minimum interval between I2C data requests - to avoid pounding the bus)
 // i2cPollingWait defaults to 100ms and is adjusted automatically when setNavigationFrequency()
@@ -1274,6 +1276,7 @@ bool SFE_UBLOX_GNSS::checkUbloxSerial(ubxPacket *incomingUBX, uint8_t requestedC
 // Checks SPI for data, passing any new bytes to process()
 bool SFE_UBLOX_GNSS::checkUbloxSpi(ubxPacket *incomingUBX, uint8_t requestedClass, uint8_t requestedID)
 {
+#if UBLOX_PICO_ENABLE_SPI
   // Process the contents of the SPI buffer if not empty!
   for (uint8_t i = 0; i < spiBufferIndex; i++)
   {
@@ -1305,6 +1308,9 @@ bool SFE_UBLOX_GNSS::checkUbloxSpi(ubxPacket *incomingUBX, uint8_t requestedClas
   }
   digitalWrite(_csPin, HIGH);
   _spiPort->endTransaction();
+
+#endif // UBLOX_PICO_ENABLE_SPI
+
   return (true);
 
 } // end checkUbloxSpi()
@@ -4799,17 +4805,21 @@ void SFE_UBLOX_GNSS::sendSerialCommand(ubxPacket *outgoingUBX)
 // they can be processed later with process
 void SFE_UBLOX_GNSS::spiTransfer(uint8_t byteToTransfer)
 {
+#if UBLOX_PICO_ENABLE_SPI
   uint8_t returnedByte = _spiPort->transfer(byteToTransfer);
   if ((spiBufferIndex < getSpiTransactionSize()) && (returnedByte != 0xFF || currentSentence != SFE_UBLOX_SENTENCE_TYPE_NONE))
   {
     spiBuffer[spiBufferIndex] = returnedByte;
     spiBufferIndex++;
   }
+#endif // UBLOX_PICO_ENABLE_SPI
 }
 
 // Send a command via SPI
 void SFE_UBLOX_GNSS::sendSpiCommand(ubxPacket *outgoingUBX)
 {
+#if UBLOX_PICO_ENABLE_SPI
+
   if (spiBuffer == NULL)
   {
 #ifndef SFE_UBLOX_REDUCED_PROG_MEM
@@ -4881,6 +4891,8 @@ void SFE_UBLOX_GNSS::sendSpiCommand(ubxPacket *outgoingUBX)
     _debugSerial->println(outgoingUBX->checksumB, HEX);
   }
 #endif
+
+#endif // UBLOX_PICO_ENABLE_SPI
 }
 
 // Pretty prints the current ubxPacket
@@ -6123,26 +6135,32 @@ bool SFE_UBLOX_GNSS::pushRawData(uint8_t *dataBytes, size_t numDataBytes, bool s
 // Return how many bytes were pushed successfully.
 // If skipTime is true, any UBX-MGA-INI-TIME_UTC or UBX-MGA-INI-TIME_GNSS packets found in the data will be skipped,
 // allowing the user to override with their own time data with setUTCTimeAssistance.
+#if 0
 size_t SFE_UBLOX_GNSS::pushAssistNowData(const String &dataBytes, size_t numDataBytes, sfe_ublox_mga_assist_ack_e mgaAck, uint16_t maxWait)
 {
   return (pushAssistNowDataInternal(0, false, (const uint8_t *)dataBytes.c_str(), numDataBytes, mgaAck, maxWait));
 }
+#endif
 size_t SFE_UBLOX_GNSS::pushAssistNowData(const uint8_t *dataBytes, size_t numDataBytes, sfe_ublox_mga_assist_ack_e mgaAck, uint16_t maxWait)
 {
   return (pushAssistNowDataInternal(0, false, dataBytes, numDataBytes, mgaAck, maxWait));
 }
+#if 0
 size_t SFE_UBLOX_GNSS::pushAssistNowData(bool skipTime, const String &dataBytes, size_t numDataBytes, sfe_ublox_mga_assist_ack_e mgaAck, uint16_t maxWait)
 {
   return (pushAssistNowDataInternal(0, skipTime, (const uint8_t *)dataBytes.c_str(), numDataBytes, mgaAck, maxWait));
 }
+#endif
 size_t SFE_UBLOX_GNSS::pushAssistNowData(bool skipTime, const uint8_t *dataBytes, size_t numDataBytes, sfe_ublox_mga_assist_ack_e mgaAck, uint16_t maxWait)
 {
   return (pushAssistNowDataInternal(0, skipTime, dataBytes, numDataBytes, mgaAck, maxWait));
 }
+#if 0
 size_t SFE_UBLOX_GNSS::pushAssistNowData(size_t offset, bool skipTime, const String &dataBytes, size_t numDataBytes, sfe_ublox_mga_assist_ack_e mgaAck, uint16_t maxWait)
 {
   return (pushAssistNowDataInternal(offset, skipTime, (const uint8_t *)dataBytes.c_str(), numDataBytes, mgaAck, maxWait));
 }
+#endif
 size_t SFE_UBLOX_GNSS::pushAssistNowData(size_t offset, bool skipTime, const uint8_t *dataBytes, size_t numDataBytes, sfe_ublox_mga_assist_ack_e mgaAck, uint16_t maxWait)
 {
   return (pushAssistNowDataInternal(offset, skipTime, dataBytes, numDataBytes, mgaAck, maxWait));
@@ -6520,10 +6538,12 @@ bool SFE_UBLOX_GNSS::setPositionAssistanceLLH(int32_t lat, int32_t lon, int32_t 
 // The daysIntoFture parameter makes it easy to get the data for (e.g.) tomorrow based on today's date
 // Returns numDataBytes if unsuccessful
 // TO DO: enhance this so it will find the nearest data for the chosen day - instead of an exact match
+#if 0
 size_t SFE_UBLOX_GNSS::findMGAANOForDate(const String &dataBytes, size_t numDataBytes, uint16_t year, uint8_t month, uint8_t day, uint8_t daysIntoFuture)
 {
   return (findMGAANOForDateInternal((const uint8_t *)dataBytes.c_str(), numDataBytes, year, month, day, daysIntoFuture));
 }
+#endif 
 size_t SFE_UBLOX_GNSS::findMGAANOForDate(const uint8_t *dataBytes, size_t numDataBytes, uint16_t year, uint8_t month, uint8_t day, uint8_t daysIntoFuture)
 {
   return (findMGAANOForDateInternal(dataBytes, numDataBytes, year, month, day, daysIntoFuture));

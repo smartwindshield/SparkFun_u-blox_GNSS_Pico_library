@@ -711,7 +711,7 @@ public:
   // Begin will then return true if "signs of life" have been seen: reception of _any_ valid UBX packet or _any_ valid NMEA header.
   // By default use the default I2C address, and use Wire port
   bool begin(TwoWire &wirePort, uint8_t deviceAddress = 0x42, uint16_t maxWait = defaultMaxWait, bool assumeSuccess = false); // Returns true if module is detected
-#if 0
+#if UBLOX_PICO_ENABLE_SPI
   // serialPort needs to be perviously initialized to correct baud rate
   bool begin(Stream &serialPort, uint16_t maxWait = defaultMaxWait, bool assumeSuccess = false); // Returns true if module is detected
   // SPI - supply instance of SPIClass, chip select pin and SPI speed (in Hz)
@@ -1751,9 +1751,11 @@ private:
   Stream *_nmeaOutputPort = NULL; // The user can assign an output port to print NMEA sentences if they wish
   Stream *_debugSerial;           // The stream to send debug messages to if enabled
   Stream *_outputPort = NULL;
+#if UBLOX_PICO_ENABLE_SPI
   SPIClass *_spiPort; // The instance of SPIClass
   uint8_t _csPin;     // The chip select pin
   uint32_t _spiSpeed; // The speed to use for SPI (Hz)
+#endif // UBLOX_PICO_ENABLE_SPI
 
   uint8_t _gpsI2Caddress = 0x42; // Default 7-bit unshifted address of the ublox 6/7/8/M8/F9 series
   // This can be changed using the ublox configuration software

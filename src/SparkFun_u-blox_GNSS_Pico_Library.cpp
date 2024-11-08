@@ -11,6 +11,7 @@
 
   Original version by Nathan Seidle @ SparkFun Electronics, September 6th, 2018
   v2.0 rework by Paul Clark @ SparkFun Electronics, December 31st, 2020
+  Raspbbery Pi Pico Port by Alejandro Zeise, November 7th, 2024
 
   This library handles configuring and handling the responses
   from a u-blox GPS module. Works with most modules from u-blox including
@@ -637,7 +638,7 @@ size_t SFE_UBLOX_GNSS::getPacketCfgSpaceRemaining()
 bool SFE_UBLOX_GNSS::begin(TwoWire &wirePort, uint8_t deviceAddress, uint16_t maxWait, bool assumeSuccess)
 {
   commType = COMM_TYPE_I2C;
-  //_i2cPort = &wirePort; // Grab which port the user wants us to use
+  _i2cPort = &wirePort; // Grab which port the user wants us to use
   _signsOfLife = false; // Clear the _signsOfLife flag. It will be set true if valid traffic is seen.
 
   // We expect caller to begin their I2C port, with the speed of their choice external to the library

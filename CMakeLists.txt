@@ -6,7 +6,7 @@ add_library(sparkfun_ublox_gnss_pico
 )
 
 target_include_directories(sparkfun_ublox_gnss_pico PRIVATE
-    src/
+    include/
 )
 target_link_libraries(sparkfun_ublox_gnss_pico 
     pico_stdlib

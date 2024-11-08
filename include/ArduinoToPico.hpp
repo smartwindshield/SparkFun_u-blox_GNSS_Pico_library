@@ -51,7 +51,14 @@ public:
     virtual void println(const char* s) = 0;
     virtual void println(const uint8_t thing, uint8_t format) = 0;
 
-    virtual int write(uint8_t *data, size_t len) = 0;
+    virtual int write(uint8_t *data, size_t len) {
+        for (int i = 0; i < len; i++) {
+            this->print(data[i], HEX);
+        }
+
+        return len;
+    }
+
     virtual int write(uint8_t singleByte) {
         return write(&singleByte, 1);
     }
@@ -134,8 +141,6 @@ public:
     virtual void println(uint16_t ui) override;
     virtual void println(const char* s) override;
     virtual void println(const uint8_t thing, uint8_t format) override;
-
-    virtual int write(uint8_t *data, size_t len) override;
 
     virtual bool available() override;
     virtual int read() override;

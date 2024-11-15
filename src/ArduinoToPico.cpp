@@ -7,15 +7,37 @@
 
 static const int I2C_TIMEOUT = 10000;
 
+/*
+ * Error codes for endTransmission()
+ * @see https://docs.arduino.cc/language-reference/en/functions/communication/Wire/endTransmission/
+ */
+static const int END_TRANSMISSION_ERROR_GENERIC = 4;
+static const int END_TRANSMISSION_ERROR_TIMEOUT = 5;
+
 void PicoTwoWire::beginTransmission(uint8_t address) {
-   this->currentAddress = address; 
+    this->currentAddress = address; 
 }
 
 int PicoTwoWire::endTransmission(bool stopOrRestart) {
-    int bytesWritten = i2c_write_blocking(i2c_default, this->currentAddress, this->txBuffer, this->txBufferPos, !stopOrRestart);
+    int retval = 0;
+    int bytesWritten = i2c_write_timeout_us(i2c_default, this->currentAddress,
+                                            this->txBuffer, this->txBufferPos,
+                                            !stopOrRestart, I2C_TIMEOUT);
+
+    // Check if buffer was sent correctly
+    if (bytesWritten != this->txBufferPos) {
+        // I2C function returned error, determine if it was a timeout
+        
+        if (bytesWritten == PICO_ERROR_TIMEOUT) {
+            retval = END_TRANSMISSION_ERROR_TIMEOUT;
+        } else {
+            retval = END_TRANSMISSION_ERROR_GENERIC;
+        }
+    }
 
     this->txBufferPos = 0;
-    return 0; // TODO: Supposed to return if target ACK'd or not
+
+    return retval;
 }
 
 int PicoTwoWire::write(uint8_t *bytes, size_t len) {
